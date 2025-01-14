@@ -1,0 +1,63 @@
+{
+  "name": "mk-design",
+  "license": "MIT",
+  "version": "3.3.4",
+  "repository": "https://github.com/wappsnet/mk-router.git",
+  "main": "dist/index.js",
+  "module": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "author": "Mikayel Tevanyan <wappsnet201@gmail.com>",
+  "publishConfig": {
+    "registry": "https://registry.npmjs.org"
+  },
+  "dependencies": {
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
+  },
+  "devDependencies": {
+    "@types/react": "^18.3.7",
+    "@types/react-dom": "^18.3.0",
+    "@typescript-eslint/eslint-plugin": "^8.20.0",
+    "@typescript-eslint/parser": "^8.20.0",
+    "eslint": "^8.35.0",
+    "eslint-import-resolver-typescript": "^3.7.0",
+    "eslint-plugin-import": "^2.31.0",
+    "eslint-plugin-prettier": "^5.2.1",
+    "eslint-plugin-react": "^7.37.4",
+    "eslint-plugin-react-hooks": "^5.1.0",
+    "husky": "^9.1.6",
+    "lint-staged": "^15.2.10",
+    "prettier": "^3.3.3",
+    "tsc-alias": "^1.8.10",
+    "typescript": "5.4.3",
+    "webpack": "^5.95.0"
+  },
+  "peerDependencies": {
+    "@types/react": "*",
+    "@types/react-dom": "*",
+    "react": "*",
+    "react-dom": "*"
+  },
+  "scripts": {
+    "lint": "eslint . --quiet --fix",
+    "format": "prettier --write .",
+    "prebuild": "prettier --write . && eslint . --quiet --fix",
+    "build": "tsc && tsc-alias",
+    "mk-release": "sh publish.sh release",
+    "mk-prerelease": "sh publish.sh prerelease"
+  },
+  "lint-staged": {
+    "*.{js,ts,tsx}": [
+      "eslint --quiet --fix"
+    ]
+  },
+  "files": [
+    "dist/",
+    "dist/**/*.ts",
+    "dist/**/*.js",
+    "dist/**/*.d.ts"
+  ],
+  "browser": {
+    "[module-name]": true
+  }
+}

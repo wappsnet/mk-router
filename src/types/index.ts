@@ -7,3 +7,8 @@ export interface MKHistoryDto {
   go: (n: number) => void;
   listen: (listener: MKHistoryListenerDto) => () => void;
 }
+
+export interface MKRouteMatchDto {
+  path: string;
+  params: Record<string, string>;
+}

@@ -49,15 +49,27 @@ export const createHistory = ({ listeners = [], basePath = '' }: MKHistoryMetaDt
   };
 };
 
-export const pathToRegexp = ({
+export const pathToMatch = ({
   path,
   pathname,
   exact = false,
+  strict = false,
+  sensitive = false,
 }: {
   path: string;
   pathname: string;
   exact?: boolean;
+  sensitive?: boolean;
+  strict?: boolean;
 }) => {
+  if (strict && path.toLowerCase() !== pathname.toLowerCase()) {
+    return null;
+  }
+
+  if (sensitive && path !== pathname) {
+    return null;
+  }
+
   const routeParts = path.split('/').filter(Boolean); // Split path into parts
   const urlParts = pathname.split('/').filter(Boolean); // Split pathname into parts
 

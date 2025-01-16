@@ -39,9 +39,7 @@ import { Router, Route } from 'mk-router';
 
 const Home = () => <h1>Welcome to the Home Page</h1>;
 const About = () => <h1>About Us</h1>;
-const Profile = ({ params }: { params: { id: string } }) => (
-  <h1>Profile ID: {params.id}</h1>
-);
+const Profile = ({ params }: { params: { id: string } }) => <h1>Profile ID: {params.id}</h1>;
 
 function App() {
   return (
@@ -68,7 +66,7 @@ within the `Router`.
 Define individual routes using the `Route` component.
 
 | Prop        | Type                  | Description                                       |
-|-------------|-----------------------|---------------------------------------------------|
+| ----------- | --------------------- | ------------------------------------------------- |
 | `path`      | `string`              | The URL path to match for this route.             |
 | `component` | `React.ComponentType` | The component to render when the path is matched. |
 

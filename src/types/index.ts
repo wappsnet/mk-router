@@ -12,3 +12,16 @@ export interface MKRouteMatchDto {
   path: string;
   params: Record<string, string>;
 }
+
+export interface MKPathDto {
+  pathname: string;
+  search: string;
+  hash: string;
+}
+
+export interface MKLocationDto<State = any> extends MKPathDto {
+  state: State;
+  key: string;
+}
+
+export type MKToDto = string | Partial<MKPathDto>;

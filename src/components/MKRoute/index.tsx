@@ -1,7 +1,7 @@
 import { useMemo, ReactNode, FC, ComponentType } from 'react';
 
-import { pathToMatch } from 'helpers';
-import { useMKRouter } from 'hooks';
+import { pathToProps } from 'helpers';
+import { useMKLocation } from 'hooks';
 import { MKRouteMatchDto } from 'types';
 
 export interface MKRouteProps {
@@ -19,31 +19,23 @@ export interface MKRouteProps {
 export const MKRoute: FC<MKRouteProps> = ({
   path,
   exact = false,
-  strict = false,
-  sensitive = false,
   index = 0,
   children,
   component: Component,
   render,
   guard,
 }) => {
-  const { location } = useMKRouter();
+  const { pathname } = useMKLocation();
 
-  const match = useMemo(() => {
-    if (!location?.pathname) {
-      return null;
-    }
-
-    const { pathname } = location;
-
-    return pathToMatch({
-      path,
-      pathname,
-      exact,
-      sensitive,
-      strict,
-    });
-  }, [location, path, exact, sensitive, strict]);
+  const match = useMemo(
+    () =>
+      pathToProps({
+        path: pathname,
+        match: path,
+        exact,
+      }),
+    [pathname, path, exact],
+  );
 
   if (!match) {
     return null;

@@ -2,7 +2,7 @@ import { ReactNode, FC, MouseEvent, AnchorHTMLAttributes, useMemo, useCallback }
 
 import { clsx } from 'clsx';
 
-import { useMKRouter } from 'hooks';
+import { useMKLocation, useMKRouter } from 'hooks';
 
 export interface MKLinkProps extends AnchorHTMLAttributes<HTMLAnchorElement> {
   to: string;
@@ -24,18 +24,15 @@ export const MKLink: FC<MKLinkProps> = ({
   className = '',
   ...props
 }) => {
-  const { history, location } = useMKRouter();
+  const { history } = useMKRouter();
+  const { pathname } = useMKLocation();
 
   const isActive = useMemo(() => {
-    if (!location) {
-      return false;
-    }
-
     if (exact) {
-      return location.pathname === to;
+      return pathname === to;
     }
-    return location.pathname.startsWith(to);
-  }, [location, to, exact]);
+    return pathname.startsWith(to);
+  }, [pathname, to, exact]);
 
   const handleClick = useCallback(
     (e: MouseEvent<HTMLAnchorElement>) => {

@@ -2,21 +2,21 @@ import { MKHistoryDto, MKHistoryListenerDto, MKPathDto } from 'types';
 
 interface MKHistoryMetaDto {
   listeners?: MKHistoryListenerDto[];
-  basePath?: string;
+  basename?: string;
 }
 
-export const createHistory = ({ listeners = [], basePath = '' }: MKHistoryMetaDto): MKHistoryDto => {
+export const createHistory = ({ listeners = [], basename = '' }: MKHistoryMetaDto): MKHistoryDto => {
   const notifyListeners = () => {
     const location = window.location; // Current window location
     listeners?.forEach((listener) => listener(location));
   };
 
   const generatePath = (path: string) => {
-    if (path.startsWith(basePath)) {
+    if (path.startsWith(basename)) {
       return path;
     }
 
-    return `${basePath}${path}`;
+    return `${basename}${path}`;
   };
 
   return {
@@ -49,41 +49,21 @@ export const createHistory = ({ listeners = [], basePath = '' }: MKHistoryMetaDt
   };
 };
 
-export const pathToMatch = ({
-  path,
-  pathname,
-  exact = false,
-  strict = false,
-  sensitive = false,
-}: {
-  path: string;
-  pathname: string;
-  exact?: boolean;
-  sensitive?: boolean;
-  strict?: boolean;
-}) => {
-  if (strict && path.toLowerCase() !== pathname.toLowerCase()) {
-    return null;
-  }
+export const pathToProps = ({ match, path, exact = false }: { match: string; path: string; exact?: boolean }) => {
+  const pathParts = path.split('/').filter(Boolean); // Split path into parts
+  const matchParts = match.split('/').filter(Boolean); // Split pathname into parts
 
-  if (sensitive && path !== pathname) {
-    return null;
-  }
-
-  const routeParts = path.split('/').filter(Boolean); // Split path into parts
-  const urlParts = pathname.split('/').filter(Boolean); // Split pathname into parts
-
-  if (exact && routeParts.length !== urlParts.length) {
+  if (exact && pathParts.length !== matchParts.length) {
     return null;
   }
 
   const params: Record<string, string> = {};
 
-  for (let i = 0; i < routeParts.length; i++) {
-    const routeSegment = routeParts[i];
-    const urlSegment = urlParts[i];
+  for (let i = 0; i < pathParts.length; i++) {
+    const routeSegment = pathParts[i];
+    const matchSegment = matchParts[i];
 
-    if (!urlSegment) {
+    if (!matchSegment) {
       if (exact) {
         return null;
       }
@@ -96,8 +76,8 @@ export const pathToMatch = ({
 
     if (routeSegment.startsWith(':')) {
       const paramName = routeSegment.slice(1); // Remove `:`
-      params[paramName] = urlSegment;
-    } else if (routeSegment !== urlSegment) {
+      params[paramName] = matchSegment;
+    } else if (routeSegment !== matchSegment) {
       return null;
     }
   }
@@ -261,11 +241,11 @@ export interface PathPattern<Path extends string = string> {
    * Should be `true` if the static portions of the `path` should be matched in
    * the same case.
    */
-  caseSensitive?: boolean;
+  sensitive?: boolean;
   /**
    * Should be `true` if this pattern should match the entire URL pathname.
    */
-  end?: boolean;
+  strict?: boolean;
 }
 
 /**
@@ -295,18 +275,18 @@ export interface PathMatch<ParamKey extends string = string> {
  * the match.
  */
 export function matchPath<ParamKey extends ParamParseKey<Path>, Path extends string>(
-  pattern: PathPattern<Path> | Path,
   pathname: string,
+  pattern: PathPattern<Path> | Path,
 ): PathMatch<ParamKey> | null {
   if (typeof pattern === 'string') {
     pattern = {
       path: pattern,
-      caseSensitive: false,
-      end: true,
+      sensitive: false,
+      strict: true,
     };
   }
 
-  const [matcher, compiledParams] = compilePath(pattern.path, pattern.caseSensitive, pattern.end);
+  const [matcher, compiledParams] = compilePath(pattern.path, pattern.sensitive, pattern.strict);
 
   const match = pathname.match(matcher);
 
@@ -350,7 +330,7 @@ type CompiledPathParam = {
   paramName: string;
 };
 
-function compilePath(path: string, caseSensitive = false, end = true): [RegExp, CompiledPathParam[]] {
+function compilePath(path: string, sensitive = false, strict = true): [RegExp, CompiledPathParam[]] {
   const cond = path === '*' || !path.endsWith('*') || path.endsWith('/*');
   warning(
     cond,
@@ -376,7 +356,7 @@ function compilePath(path: string, caseSensitive = false, end = true): [RegExp, 
     } else {
       regexp += '(?:\\/(.+)|\\/*)$';
     }
-  } else if (end) {
+  } else if (strict) {
     // When matching to the end, ignore trailing slashes
     regexp += '\\/*$';
   } else if (path !== '' && path !== '/') {
@@ -392,7 +372,7 @@ function compilePath(path: string, caseSensitive = false, end = true): [RegExp, 
     // Nothing to match for "" or "/"
   }
 
-  if (caseSensitive) {
+  if (sensitive) {
     const matcher = new RegExp(regexp);
 
     return [matcher, params];

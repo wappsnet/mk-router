@@ -2,7 +2,14 @@ import { useContext, useMemo } from 'react';
 
 import { MK_ROUTER_CONTEXT } from 'definitions';
 
-export const useMKRouter = () => useContext(MK_ROUTER_CONTEXT);
+export const useMKRouter = () => {
+  const context = useContext(MK_ROUTER_CONTEXT);
+
+  return {
+    history: context.history,
+    location: context.history.location,
+  };
+};
 
 export const useMKLocation = () => {
   const { location } = useMKRouter();
@@ -11,7 +18,7 @@ export const useMKLocation = () => {
 };
 
 export const useMKQuery = () => {
-  const { location } = useMKRouter();
+  const location = useMKLocation();
 
   return useMemo(() => {
     if (!location?.search) {

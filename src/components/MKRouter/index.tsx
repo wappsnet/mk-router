@@ -1,11 +1,11 @@
 import { ReactNode, useEffect, useState, FC, useMemo } from 'react';
 
 import { MK_ROUTER_CONTEXT } from 'definitions';
-import { MKHistoryDto } from 'types';
+import { MKHistoryDto, MKLocationDto } from 'types';
 
 interface MKRouterRenderProps {
   history: MKHistoryDto;
-  location: Location;
+  location: MKLocationDto;
 }
 
 export interface MKRouterProps {

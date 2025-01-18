@@ -4,6 +4,12 @@ import { MK_ROUTER_CONTEXT } from 'definitions';
 
 export const useMKRouter = () => useContext(MK_ROUTER_CONTEXT);
 
+export const useMKLocation = () => {
+  const { location } = useMKRouter();
+
+  return location;
+};
+
 export const useMKQuery = () => {
   const { location } = useMKRouter();
 

@@ -1,7 +1,7 @@
 {
-  "name": "mk-design",
+  "name": "mk-router",
   "license": "MIT",
-  "version": "3.3.4",
+  "version": "1.0.0",
   "repository": "https://github.com/wappsnet/mk-router.git",
   "main": "dist/index.js",
   "module": "dist/index.js",

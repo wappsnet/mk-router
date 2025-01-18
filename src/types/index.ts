@@ -28,25 +28,3 @@ export interface MKLocationDto<State = unknown> extends MKPathDto {
 }
 
 export type MKToDto = string | Partial<MKPathDto>;
-
-export interface MKRouterStaticContext {
-  statusCode?: number;
-}
-
-export interface MKMatchDto<Params extends { [K in keyof Params]?: string } = Partial<Record<string, string>>> {
-  params: Params;
-  isExact: boolean;
-  path: string;
-  url: string;
-}
-
-export interface RouteComponentProps<
-  Params extends { [K in keyof Params]?: string } = Partial<Record<string, string>>,
-  C extends MKRouterStaticContext = MKRouterStaticContext,
-  S = unknown,
-> {
-  history: MKHistoryDto<S>;
-  location: MKLocationDto<S>;
-  match: MKMatchDto<Params>;
-  staticContext?: C | undefined;
-}

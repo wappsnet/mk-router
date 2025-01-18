@@ -9,6 +9,8 @@ export interface MKHistoryDto {
 }
 
 export interface MKRouteMatchDto {
+  history: MKHistoryDto;
+  location: Location;
   path: string;
   params: Record<string, string>;
   index?: number;

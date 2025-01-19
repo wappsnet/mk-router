@@ -1,4 +1,4 @@
-import { ReactNode, Children, isValidElement, FC, useMemo, useEffect } from 'react';
+import { ReactNode, Children, isValidElement, FC, useMemo, useEffect, memo } from 'react';
 
 import { matchPath } from 'helpers';
 import { useMKRouter } from 'hooks';
@@ -9,7 +9,7 @@ export interface SwitchProps {
   mandatory?: boolean;
 }
 
-export const MKSwitch: FC<SwitchProps> = ({ children, index, mandatory = false }) => {
+export const MKSwitchPure: FC<SwitchProps> = ({ children, index, mandatory = false }) => {
   const { location, history } = useMKRouter();
 
   const routes = useMemo(
@@ -69,3 +69,5 @@ export const MKSwitch: FC<SwitchProps> = ({ children, index, mandatory = false }
     return <>{node}</>;
   }
 };
+
+export const MKSwitch = memo(MKSwitchPure);

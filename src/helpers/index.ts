@@ -1,4 +1,4 @@
-import { MKHistoryDto, MKHistoryListenerDto, MKLocationDto, MKPathDto } from 'types';
+import { MKHistoryDto, MKHistoryListenerDto, MKLocationDto, MKPathDto, MKPathParams } from 'types';
 
 interface MKHistoryMetaDto {
   listeners?: MKHistoryListenerDto[];
@@ -68,7 +68,7 @@ export const pathToProps = ({ match, path, exact = false }: { match: string; pat
     return null;
   }
 
-  const params: Record<string, string> = {};
+  const params: MKPathParams = {};
 
   for (let i = 0; i < pathParts.length; i++) {
     const routeSegment = pathParts[i];
@@ -170,73 +170,13 @@ type _PathParam<Path extends string> =
  * "/:a/:b" -> "a" | "b"
  * "/:a/b/:c/*" -> "a" | "c" | "*"
  */
-export type PathParam<Path extends string> =
+export type MKPathParam<Path extends string> =
   // check if path is just a wildcard
   Path extends '*' | '/*' ? '*' : Path extends `${infer Rest}/*` ? '*' | _PathParam<Rest> : _PathParam<Path>;
 
-export type ParamParseKey<Segment extends string> = [PathParam<Segment>] extends [never] ? string : PathParam<Segment>;
-
-/**
- * The parameters that were parsed from the URL path.
- */
-export type Params<Key extends string = string> = {
-  readonly [key in Key]?: string;
-};
-
-/**
- * Returns a path with params interpolated.
- */
-export function generatePath<Path extends string>(
-  originalPath: Path,
-  params: {
-    [key in PathParam<Path>]: string | null;
-  },
-): string {
-  let path: string = originalPath;
-  if (path.endsWith('*') && path !== '*' && !path.endsWith('/*')) {
-    warning(
-      false,
-      `Route path "${path}" will be treated as if it were ` +
-        `"${path.replace(/\*$/, '/*')}" because the \`*\` character must ` +
-        `always follow a \`/\` in the pattern. To get rid of this warning, ` +
-        `please change the route path to "${path.replace(/\*$/, '/*')}".`,
-    );
-    path = path.replace(/\*$/, '/*') as Path;
-  }
-
-  // ensure `/` is added at the beginning if the path is absolute
-  const prefix = path.startsWith('/') ? '/' : '';
-
-  const stringify = (p: any) => (p == null ? '' : typeof p === 'string' ? p : String(p));
-
-  const segments = path
-    .split(/\/+/)
-    .map((segment, index, array) => {
-      const isLastSegment = index === array.length - 1;
-
-      // only apply the splat if it's the last segment
-      if (isLastSegment && segment === '*') {
-        const star = '*' as PathParam<Path>;
-        // Apply the splat
-        return stringify(params[star]);
-      }
-
-      const keyMatch = segment.match(/^:([\w-]+)(\??)$/);
-      if (keyMatch) {
-        const [, key, optional] = keyMatch;
-        const param = params[key as PathParam<Path>];
-        invariant(optional === '?' || param != null, `Missing ":${key}" param`);
-        return stringify(param);
-      }
-
-      // Remove any optional markers from optional static segments
-      return segment.replace(/\?$/g, '');
-    })
-    // Remove empty segments
-    .filter((segment) => !!segment);
-
-  return prefix + segments.join('/');
-}
+export type MKPathParamParseKey<Segment extends string> = [MKPathParam<Segment>] extends [never]
+  ? string
+  : MKPathParam<Segment>;
 
 /**
  * A PathPattern is used to match on some portion of a URL pathname.
@@ -266,7 +206,7 @@ export interface MKPathMatch<ParamKey extends string = string> {
   /**
    * The names and values of dynamic parameters in the URL.
    */
-  params: Params<ParamKey>;
+  params: MKPathParams<ParamKey>;
   /**
    * The portion of the URL pathname that was matched.
    */
@@ -285,7 +225,7 @@ export interface MKPathMatch<ParamKey extends string = string> {
  * Performs pattern matching on a URL pathname and returns information about
  * the match.
  */
-export function matchPath<ParamKey extends ParamParseKey<Path>, Path extends string>(
+export function matchPath<ParamKey extends MKPathParamParseKey<Path>, Path extends string>(
   pathname: string,
   pattern: MKPathPattern<Path> | Path,
 ): MKPathMatch<ParamKey> | null {
@@ -312,7 +252,7 @@ export function matchPath<ParamKey extends ParamParseKey<Path>, Path extends str
     pathname: extracted,
     basename: extracted.replace(/(.)\/+$/, '$1'),
     pattern,
-    params: params.reduce<Params>((memo, { paramName }, index) => {
+    params: params.reduce<MKPathParams>((memo, { paramName }, index) => {
       const capture = captures[index] || '';
       const value = capture.replace(/%2F/g, '/');
 

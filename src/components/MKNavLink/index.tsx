@@ -1,4 +1,4 @@
-import { ReactNode, FC, MouseEvent, AnchorHTMLAttributes, useMemo, useCallback } from 'react';
+import { ReactNode, FC, MouseEvent, AnchorHTMLAttributes, useMemo, useCallback, memo } from 'react';
 
 import { clsx } from 'clsx';
 
@@ -13,7 +13,7 @@ export interface MKNavLinkProps extends AnchorHTMLAttributes<HTMLAnchorElement> 
   isExternal?: boolean;
 }
 
-export const MKNavLink: FC<MKNavLinkProps> = ({
+export const MKNavLinkPure: FC<MKNavLinkProps> = ({
   to,
   children,
   onClick,
@@ -56,3 +56,5 @@ export const MKNavLink: FC<MKNavLinkProps> = ({
     </a>
   );
 };
+
+export const MKNavLink = memo(MKNavLinkPure);

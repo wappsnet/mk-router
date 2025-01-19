@@ -43,5 +43,7 @@ export const MKRouter: FC<MKRouterProps> = ({ children, render, history }) => {
     [handleSetRoute, history, location, routes],
   );
 
-  return <MK_ROUTER_CONTEXT.Provider value={value}>{render?.(value) ?? children}</MK_ROUTER_CONTEXT.Provider>;
+  const content = useMemo(() => render?.(value) ?? children, [children, render, value]);
+
+  return <MK_ROUTER_CONTEXT.Provider value={value}>{content}</MK_ROUTER_CONTEXT.Provider>;
 };

@@ -25,8 +25,7 @@ export interface MKHistoryDto<S = unknown> {
 export interface MKRouteMatchDto {
   location: MKLocationDto;
   path: string;
-  params: Record<string, string>;
-  index?: number;
+  params: MKPathParams;
 }
 
 export interface MKPathDto {
@@ -41,3 +40,10 @@ export interface MKLocationDto<State = unknown> extends MKPathDto {
 }
 
 export type MKToDto = string | Partial<MKPathDto>;
+
+/**
+ * The parameters that were parsed from the URL path.
+ */
+export type MKPathParams<Key extends string = string> = {
+  [key in Key]?: string;
+};

@@ -1,8 +1,8 @@
-import { useMemo, ReactNode, FC, ComponentType, isValidElement, cloneElement, useEffect } from 'react';
+import { useMemo, ReactNode, ComponentType, isValidElement, cloneElement, useEffect, FC, memo } from 'react';
 
 import { createLocationKey, pathToProps } from 'helpers';
 import { useMKRouter } from 'hooks';
-import { MKRouteMatchDto } from 'types';
+import { MKPathParams, MKRouteMatchDto } from 'types';
 
 export interface MKRouteProps {
   path: string;
@@ -10,12 +10,12 @@ export interface MKRouteProps {
   sensitive?: boolean;
   strict?: boolean;
   children?: ReactNode;
-  component?: ComponentType<MKRouteMatchDto>;
+  component?: ComponentType<MKPathParams>;
   render?: (match: MKRouteMatchDto) => ReactNode;
   guard?: (match: MKRouteMatchDto) => boolean;
 }
 
-export const MKRoute: FC<MKRouteProps> = ({
+export const MKRoutePure: FC<MKRouteProps> = ({
   path,
   exact = false,
   children,
@@ -60,7 +60,7 @@ export const MKRoute: FC<MKRouteProps> = ({
     }
 
     if (Component) {
-      return <Component {...props} />;
+      return <Component {...props.params} />;
     }
 
     if (isValidElement(children)) {
@@ -68,7 +68,7 @@ export const MKRoute: FC<MKRouteProps> = ({
         <>
           {cloneElement(children, {
             ...children.props,
-            ...props,
+            ...props.params,
           })}
         </>
       );
@@ -91,3 +91,5 @@ export const MKRoute: FC<MKRouteProps> = ({
 
   return node;
 };
+
+export const MKRoute = memo(MKRoutePure);

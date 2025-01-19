@@ -23,7 +23,6 @@ export interface MKHistoryDto<S = unknown> {
 }
 
 export interface MKRouteMatchDto {
-  history: MKHistoryDto;
   location: MKLocationDto;
   path: string;
   params: Record<string, string>;

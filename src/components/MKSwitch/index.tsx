@@ -24,7 +24,7 @@ export const MKSwitch: FC<SwitchProps> = ({ children, index, mandatory = false }
     [children],
   );
 
-  const element = useMemo(() => {
+  const { action, node } = useMemo(() => {
     const matched = routes?.find((child) => {
       const { path, exact = false } = child.props;
 
@@ -54,13 +54,18 @@ export const MKSwitch: FC<SwitchProps> = ({ children, index, mandatory = false }
         node: null,
       };
     }
+
+    return {
+      node: null,
+      action: null,
+    };
   }, [history, index, location.pathname, mandatory, routes]);
 
   useEffect(() => {
-    element?.action?.();
-  }, [element, element?.action]);
+    action?.();
+  }, [action]);
 
-  if (element?.node) {
-    return <>{element.node}</>;
+  if (node) {
+    return <>{node}</>;
   }
 };

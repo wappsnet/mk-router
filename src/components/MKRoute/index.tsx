@@ -25,7 +25,7 @@ export const MKRoute: FC<MKRouteProps> = ({
   strict,
   sensitive,
 }) => {
-  const { history, location, setRoute } = useMKRouter();
+  const { location, setRoute } = useMKRouter();
 
   const match = useMemo(
     () =>
@@ -41,11 +41,10 @@ export const MKRoute: FC<MKRouteProps> = ({
     if (match) {
       return {
         ...match,
-        location: history.location,
-        history: history,
+        location: location,
       };
     }
-  }, [history, match]);
+  }, [location, match]);
 
   const node = useMemo(() => {
     if (!props) {

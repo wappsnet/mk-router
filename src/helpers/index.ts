@@ -1,4 +1,4 @@
-import { MKHistoryDto, MKHistoryListenerDto, MKPathDto } from 'types';
+import { MKHistoryDto, MKHistoryListenerDto, MKLocationDto, MKPathDto } from 'types';
 
 interface MKHistoryMetaDto {
   listeners?: MKHistoryListenerDto[];
@@ -11,11 +11,7 @@ export const createHistory = ({ listeners = [], basename = '' }: MKHistoryMetaDt
       pathname: window.location.pathname,
       search: window.location.search,
       hash: window.location.hash,
-      key: createHash({
-        pathname: window.location.pathname,
-        search: window.location.search,
-        hash: window.location.hash,
-      }),
+      key: createLocationKey(window.location),
     };
 
     listeners?.forEach((listener) => listener(location));
@@ -35,11 +31,7 @@ export const createHistory = ({ listeners = [], basename = '' }: MKHistoryMetaDt
         pathname: window.location.pathname,
         hash: window.location.hash,
         search: window.location.search,
-        key: createHash({
-          pathname: window.location.pathname,
-          search: window.location.search,
-          hash: window.location.hash,
-        }),
+        key: createLocationKey(window.location),
       };
     },
 
@@ -93,9 +85,9 @@ export const pathToProps = ({ match, path, exact = false }: { match: string; pat
       };
     }
 
-    if (routeSegment.startsWith(':')) {
-      const paramName = routeSegment.slice(1); // Remove `:`
-      params[paramName] = matchSegment;
+    if (matchSegment.startsWith(':')) {
+      const paramName = matchSegment.slice(1); // Remove `:`
+      params[paramName] = routeSegment;
     } else if (routeSegment !== matchSegment) {
       return null;
     }
@@ -249,7 +241,7 @@ export function generatePath<Path extends string>(
 /**
  * A PathPattern is used to match on some portion of a URL pathname.
  */
-export interface PathPattern<Path extends string = string> {
+export interface MKPathPattern<Path extends string = string> {
   /**
    * A string to match against a URL pathname. May contain `:id`-style segments
    * to indicate placeholders for dynamic parameters. May also end with `/*` to
@@ -270,7 +262,7 @@ export interface PathPattern<Path extends string = string> {
 /**
  * A PathMatch contains info about how a PathPattern matched on a URL pathname.
  */
-export interface PathMatch<ParamKey extends string = string> {
+export interface MKPathMatch<ParamKey extends string = string> {
   /**
    * The names and values of dynamic parameters in the URL.
    */
@@ -286,7 +278,7 @@ export interface PathMatch<ParamKey extends string = string> {
   /**
    * The pattern that was used to match.
    */
-  pattern: PathPattern;
+  pattern: MKPathPattern;
 }
 
 /**
@@ -295,8 +287,8 @@ export interface PathMatch<ParamKey extends string = string> {
  */
 export function matchPath<ParamKey extends ParamParseKey<Path>, Path extends string>(
   pathname: string,
-  pattern: PathPattern<Path> | Path,
-): PathMatch<ParamKey> | null {
+  pattern: MKPathPattern<Path> | Path,
+): MKPathMatch<ParamKey> | null {
   if (typeof pattern === 'string') {
     pattern = {
       path: pattern,
@@ -305,7 +297,7 @@ export function matchPath<ParamKey extends ParamParseKey<Path>, Path extends str
     };
   }
 
-  const [matcher, compiledParams] = compilePath(pattern.path, pattern.sensitive, pattern.strict);
+  const [matcher, params] = compilePath(pattern.path, pattern.sensitive, pattern.strict);
 
   const match = pathname.match(matcher);
 
@@ -320,7 +312,7 @@ export function matchPath<ParamKey extends ParamParseKey<Path>, Path extends str
     pathname: extracted,
     basename: extracted.replace(/(.)\/+$/, '$1'),
     pattern,
-    params: compiledParams.reduce<Params>((memo, { paramName }, index) => {
+    params: params.reduce<Params>((memo, { paramName }, index) => {
       const capture = captures[index] || '';
       const value = capture.replace(/%2F/g, '/');
 
@@ -335,7 +327,7 @@ export function matchPath<ParamKey extends ParamParseKey<Path>, Path extends str
     }, {}),
   };
 
-  compiledParams.forEach(({ paramName }, index) => {
+  params.forEach(({ paramName }, index) => {
     if (paramName === '*') {
       const splatLength = captures[index].length ?? 0;
       matched.basename = matched.pathname.slice(0, matched.pathname.length - splatLength).replace(/(.)\/+$/, '$1');
@@ -424,7 +416,7 @@ export const normalizeSearch = (search: string): string =>
 export const normalizeHash = (hash: string): string =>
   !hash || hash === '#' ? '' : hash.startsWith('#') ? hash : '#' + hash;
 
-export const createHash = (data: { pathname: string; search?: string; hash?: string }) => {
+export const createLocationKey = (data: MKLocationDto) => {
   const input = `${data.pathname}${data.search ?? ''}${data.hash ?? ''}`;
 
   let hash = 5381; // A common seed value for DJB2

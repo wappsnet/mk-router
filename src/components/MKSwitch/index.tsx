@@ -14,12 +14,8 @@ export const MKSwitch: FC<SwitchProps> = ({ children, index, mandatory = false }
 
   const routes = useMemo(
     () =>
-      Children.map(children, (child) => {
+      Children.toArray(children).flatMap((child) => {
         if (isValidElement(child) && 'path' in child.props) {
-          return child;
-        }
-      })?.flatMap((child) => {
-        if (child) {
           return [child];
         }
 
@@ -28,16 +24,13 @@ export const MKSwitch: FC<SwitchProps> = ({ children, index, mandatory = false }
     [children],
   );
 
-  console.log(routes);
-
   const element = useMemo(() => {
     const matched = routes?.find((child) => {
-      const { path, exact } = child.props;
+      const { path, exact = false } = child.props;
 
-      console.info(path, exact);
       return !!matchPath(location.pathname, {
         path: path,
-        strict: !!exact,
+        strict: exact,
       });
     });
 
@@ -61,13 +54,11 @@ export const MKSwitch: FC<SwitchProps> = ({ children, index, mandatory = false }
         node: null,
       };
     }
-  }, [history, index, location?.pathname, mandatory, routes]);
+  }, [history, index, location.pathname, mandatory, routes]);
 
   useEffect(() => {
     element?.action?.();
   }, [element, element?.action]);
-
-  console.info(element?.node);
 
   if (element?.node) {
     return <>{element.node}</>;

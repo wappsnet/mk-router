@@ -1,7 +1,7 @@
 import { useContext, useMemo } from 'react';
 
 import { MK_ROUTER_CONTEXT } from 'definitions';
-import { createHash, pathToProps } from 'helpers';
+import { createLocationKey, pathToProps } from 'helpers';
 
 export const useMKRouter = () => {
   const context = useContext(MK_ROUTER_CONTEXT);
@@ -22,15 +22,7 @@ export const useMKLocation = () => {
 
 export const useMKParams = () => {
   const { location, routes } = useMKRouter();
-  const hash = useMemo(
-    () =>
-      createHash({
-        pathname: location.pathname,
-        search: location.search,
-        hash: location.hash,
-      }),
-    [location.hash, location.pathname, location.search],
-  );
+  const hash = useMemo(() => createLocationKey(location), [location]);
 
   const route = useMemo(() => routes?.[hash], [hash, routes]);
 

@@ -1,6 +1,6 @@
 import { useMemo, ReactNode, FC, ComponentType, isValidElement, cloneElement, useEffect } from 'react';
 
-import { createHash, pathToProps } from 'helpers';
+import { createLocationKey, pathToProps } from 'helpers';
 import { useMKRouter } from 'hooks';
 import { MKRouteMatchDto } from 'types';
 
@@ -64,7 +64,7 @@ export const MKRoute: FC<MKRouteProps> = ({
       return <Component {...props} />;
     }
 
-    if (isValidElement(children) && children.props) {
+    if (isValidElement(children)) {
       return (
         <>
           {cloneElement(children, {
@@ -80,11 +80,7 @@ export const MKRoute: FC<MKRouteProps> = ({
 
   useEffect(() => {
     setRoute?.({
-      key: createHash({
-        pathname: location.pathname,
-        search: location.search,
-        hash: location.hash,
-      }),
+      key: createLocationKey(location),
       location: location,
       path,
       node,
@@ -92,7 +88,7 @@ export const MKRoute: FC<MKRouteProps> = ({
       strict,
       sensitive,
     });
-  }, [location.pathname, location.search, path, node, setRoute, location, exact, strict, sensitive]);
+  }, [path, node, setRoute, location, exact, strict, sensitive]);
 
   return node;
 };

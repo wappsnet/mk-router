@@ -1,5 +1,6 @@
-import { ReactNode, Children, isValidElement, FC, useMemo } from 'react';
+import { ReactNode, Children, isValidElement, FC, useMemo, useEffect } from 'react';
 
+import { matchPath } from 'helpers';
 import { useMKRouter } from 'hooks';
 
 export interface SwitchProps {
@@ -13,8 +14,12 @@ export const MKSwitch: FC<SwitchProps> = ({ children, index, mandatory = false }
 
   const routes = useMemo(
     () =>
-      Children.toArray(children).flatMap((child) => {
+      Children.map(children, (child) => {
         if (isValidElement(child) && 'path' in child.props) {
+          return child;
+        }
+      })?.flatMap((child) => {
+        if (child) {
           return [child];
         }
 
@@ -23,31 +28,48 @@ export const MKSwitch: FC<SwitchProps> = ({ children, index, mandatory = false }
     [children],
   );
 
+  console.log(routes);
+
   const element = useMemo(() => {
     const matched = routes?.find((child) => {
       const { path, exact } = child.props;
 
-      if (exact) {
-        return location?.pathname === path;
-      }
-
-      return !!location?.pathname.startsWith(path);
+      console.info(path, exact);
+      return !!matchPath(location.pathname, {
+        path: path,
+        strict: !!exact,
+      });
     });
 
     if (matched) {
-      return matched;
+      return {
+        action: null,
+        node: matched,
+      };
     }
 
     if (index) {
-      return history.push(index);
+      return {
+        action: () => history.push(index),
+        node: null,
+      };
     }
 
-    if (mandatory) {
-      return history.push(routes[0].props.path);
+    if (mandatory && routes?.length) {
+      return {
+        action: () => history.push(routes[0].props.path),
+        node: null,
+      };
     }
   }, [history, index, location?.pathname, mandatory, routes]);
 
-  if (element) {
-    return <>{element}</>;
+  useEffect(() => {
+    element?.action?.();
+  }, [element, element?.action]);
+
+  console.info(element?.node);
+
+  if (element?.node) {
+    return <>{element.node}</>;
   }
 };

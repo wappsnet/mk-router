@@ -21,10 +21,9 @@ export const MKRouter: FC<MKRouterProps> = ({ children, render, history }) => {
   useEffect(
     () =>
       history.listen((newLocation) => {
-        console.info(location.pathname, newLocation.pathname);
         setLocation(newLocation);
       }),
-    [history, location],
+    [history],
   );
 
   const handleSetRoute = useCallback((data: MKRouteDto) => {
@@ -43,8 +42,6 @@ export const MKRouter: FC<MKRouterProps> = ({ children, render, history }) => {
     }),
     [handleSetRoute, history, location, routes],
   );
-
-  console.info(value);
 
   return <MK_ROUTER_CONTEXT.Provider value={value}>{render?.(value) ?? children}</MK_ROUTER_CONTEXT.Provider>;
 };

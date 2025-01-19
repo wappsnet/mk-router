@@ -18,7 +18,6 @@ export const createHistory = ({ listeners = [], basename = '' }: MKHistoryMetaDt
       }),
     };
 
-    console.info(location);
     listeners?.forEach((listener) => listener(location));
   };
 

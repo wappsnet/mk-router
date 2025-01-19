@@ -1,7 +1,7 @@
-import { ReactNode, useEffect, useState, FC, useMemo } from 'react';
+import { ReactNode, useEffect, useState, FC, useMemo, useCallback } from 'react';
 
 import { MK_ROUTER_CONTEXT } from 'definitions';
-import { MKHistoryDto, MKLocationDto } from 'types';
+import { MKHistoryDto, MKLocationDto, MKRouteDto } from 'types';
 
 interface MKRouterRenderProps {
   history: MKHistoryDto;
@@ -16,22 +16,35 @@ export interface MKRouterProps {
 
 export const MKRouter: FC<MKRouterProps> = ({ children, render, history }) => {
   const [location, setLocation] = useState(history.location);
+  const [routes, setRoutes] = useState({});
 
   useEffect(
     () =>
       history.listen((newLocation) => {
+        console.info(location.pathname, newLocation.pathname);
         setLocation(newLocation);
       }),
-    [history],
+    [history, location],
   );
+
+  const handleSetRoute = useCallback((data: MKRouteDto) => {
+    setRoutes((prevState) => ({
+      ...prevState,
+      [data.key]: data,
+    }));
+  }, []);
 
   const value = useMemo(
     () => ({
       history,
       location,
+      routes,
+      addRoute: handleSetRoute,
     }),
-    [history, location],
+    [handleSetRoute, history, location, routes],
   );
+
+  console.info(value);
 
   return <MK_ROUTER_CONTEXT.Provider value={value}>{render?.(value) ?? children}</MK_ROUTER_CONTEXT.Provider>;
 };

@@ -1,4 +1,18 @@
-export type MKHistoryListenerDto = (location: Location) => void;
+import { ReactNode } from 'react';
+
+export type MKHistoryListenerDto = (location: MKLocationDto) => void;
+
+export interface MKRouteDto {
+  location: MKLocationDto;
+  path: string;
+  exact?: boolean;
+  strict?: boolean;
+  sensitive?: boolean;
+  key: string;
+  node: ReactNode;
+}
+
+export type MKRoutesDto = Partial<Record<string, MKRouteDto>>;
 
 export interface MKHistoryDto<S = unknown> {
   location: MKLocationDto<S>;

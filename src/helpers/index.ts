@@ -7,7 +7,18 @@ interface MKHistoryMetaDto {
 
 export const createHistory = ({ listeners = [], basename = '' }: MKHistoryMetaDto): MKHistoryDto => {
   const notifyListeners = () => {
-    const location = window.location; // Current window location
+    const location = {
+      pathname: window.location.pathname,
+      search: window.location.search,
+      hash: window.location.hash,
+      key: createHash({
+        pathname: window.location.pathname,
+        search: window.location.search,
+        hash: window.location.hash,
+      }),
+    };
+
+    console.info(location);
     listeners?.forEach((listener) => listener(location));
   };
 
@@ -21,7 +32,16 @@ export const createHistory = ({ listeners = [], basename = '' }: MKHistoryMetaDt
 
   return {
     get location() {
-      return window.location;
+      return {
+        pathname: window.location.pathname,
+        hash: window.location.hash,
+        search: window.location.search,
+        key: createHash({
+          pathname: window.location.pathname,
+          search: window.location.search,
+          hash: window.location.hash,
+        }),
+      };
     },
 
     push(path) {
@@ -404,3 +424,15 @@ export const normalizeSearch = (search: string): string =>
  */
 export const normalizeHash = (hash: string): string =>
   !hash || hash === '#' ? '' : hash.startsWith('#') ? hash : '#' + hash;
+
+export const createHash = (data: { pathname: string; search?: string; hash?: string }) => {
+  const input = `${data.pathname}${data.search ?? ''}${data.hash ?? ''}`;
+
+  let hash = 5381; // A common seed value for DJB2
+  for (let i = 0; i < input.length; i++) {
+    // Bitwise left shift by 5 and add the current character
+    hash = (hash * 33) ^ input.charCodeAt(i);
+  }
+  // Convert to a 32-bit unsigned integer and return as hexadecimal
+  return (hash >>> 0).toString(16);
+};

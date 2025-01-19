@@ -1,7 +1,7 @@
 import { createContext } from 'react';
 
 import { createHistory } from 'helpers';
-import { MKHistoryDto } from 'types';
+import { MKHistoryDto, MKRouteDto, MKRoutesDto } from 'types';
 
 const initialHistory = createHistory({
   basename: '',
@@ -9,6 +9,9 @@ const initialHistory = createHistory({
 
 export const MK_ROUTER_CONTEXT = createContext<{
   history: MKHistoryDto;
+  routes?: MKRoutesDto;
+  setRoute?: (data: MKRouteDto) => void;
 }>({
   history: initialHistory,
+  routes: {},
 });

@@ -1,6 +1,6 @@
-import { useMemo, ReactNode, FC, ComponentType } from 'react';
+import { useMemo, ReactNode, FC, ComponentType, isValidElement, cloneElement, useEffect } from 'react';
 
-import { pathToProps } from 'helpers';
+import { createHash, pathToProps } from 'helpers';
 import { useMKRouter } from 'hooks';
 import { MKRouteMatchDto } from 'types';
 
@@ -9,7 +9,6 @@ export interface MKRouteProps {
   exact?: boolean;
   sensitive?: boolean;
   strict?: boolean;
-  index?: number;
   children?: ReactNode;
   component?: ComponentType<MKRouteMatchDto>;
   render?: (match: MKRouteMatchDto) => ReactNode;
@@ -19,22 +18,23 @@ export interface MKRouteProps {
 export const MKRoute: FC<MKRouteProps> = ({
   path,
   exact = false,
-  index = 0,
   children,
   component: Component,
   render,
   guard,
+  strict,
+  sensitive,
 }) => {
-  const { history } = useMKRouter();
+  const { history, location, setRoute } = useMKRouter();
 
   const match = useMemo(
     () =>
       pathToProps({
-        path: history.location.pathname,
+        path: location.pathname,
         match: path,
         exact,
       }),
-    [history.location.pathname, path, exact],
+    [location.pathname, path, exact],
   );
 
   const props = useMemo(() => {
@@ -47,21 +47,52 @@ export const MKRoute: FC<MKRouteProps> = ({
     }
   }, [history, match]);
 
-  if (!props) {
-    return null;
-  }
+  const node = useMemo(() => {
+    if (!props) {
+      return null;
+    }
 
-  if (guard && !guard(props)) {
-    return null;
-  }
+    if (guard && !guard(props)) {
+      return null;
+    }
 
-  if (render) {
-    return <>{render(props)}</>;
-  }
+    if (render) {
+      return <>{render(props)}</>;
+    }
 
-  if (Component) {
-    return <Component index={index} {...props} />;
-  }
+    if (Component) {
+      return <Component {...props} />;
+    }
 
-  return <>{children}</>;
+    if (isValidElement(children) && children.props) {
+      return (
+        <>
+          {cloneElement(children, {
+            ...children.props,
+            ...props,
+          })}
+        </>
+      );
+    }
+
+    return <>{children}</>;
+  }, [Component, children, guard, props, render]);
+
+  useEffect(() => {
+    setRoute?.({
+      key: createHash({
+        pathname: location.pathname,
+        search: location.search,
+        hash: location.hash,
+      }),
+      location: location,
+      path,
+      node,
+      exact,
+      strict,
+      sensitive,
+    });
+  }, [location.pathname, location.search, path, node, setRoute, location, exact, strict, sensitive]);
+
+  return node;
 };

@@ -4,7 +4,7 @@ import { clsx } from 'clsx';
 
 import { useMKLocation, useMKRouter } from 'hooks';
 
-export interface MKLinkProps extends AnchorHTMLAttributes<HTMLAnchorElement> {
+export interface MKNavLinkProps extends AnchorHTMLAttributes<HTMLAnchorElement> {
   to: string;
   children: ReactNode;
   replace?: boolean;
@@ -13,7 +13,7 @@ export interface MKLinkProps extends AnchorHTMLAttributes<HTMLAnchorElement> {
   isExternal?: boolean;
 }
 
-export const MKLink: FC<MKLinkProps> = ({
+export const MKNavLink: FC<MKNavLinkProps> = ({
   to,
   children,
   onClick,
